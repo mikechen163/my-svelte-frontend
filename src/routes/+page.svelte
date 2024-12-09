@@ -2,14 +2,18 @@
     import { Button } from "$lib/components/ui/button";  
     import { Card } from "$lib/components/ui/card";  
     import { Input } from "$lib/components/ui/input";  
-    import { onMount } from "svelte";  
 
     let ticker = "";  
     let loading = false;  
     let error = "";  
     let chartImage: string | null = null;  
     let financials: any[] | null = null;  
-    let timeframe: '1d' | '1w' = '1d'; // Add timeframe state  
+    let timeframe: '1d' | '1w' = '1d';  
+
+    // Add date state  
+    let startDate = new Date();  
+    startDate.setFullYear(startDate.getFullYear() - 2); // Default to 2 years ago  
+    let dateString = startDate.toISOString().split('T')[0]; // Format for input date  
 
     const API_URL = "http://192.168.191.206:8000";  
 
@@ -25,20 +29,21 @@
         financials = null;  
 
         try {  
-            // First check if the API is accessible  
             const healthCheck = await fetch(`${API_URL}/health`);  
             if (!healthCheck.ok) {  
                 throw new Error('API server is not responding');  
             }  
 
-            // Add timeframe parameter to the URL  
-            const response = await fetch(`${API_URL}/api/stock/${ticker}?timeframe=${timeframe}`, {  
-                method: 'GET',  
-                headers: {  
-                    'Accept': 'application/json',  
-                    'Origin': 'http://192.168.191.56:5173'  
-                },  
-            });  
+            const response = await fetch(  
+                `${API_URL}/api/stock/${ticker}?timeframe=${timeframe}&start_date=${dateString}`,   
+                {  
+                    method: 'GET',  
+                    headers: {  
+                        'Accept': 'application/json',  
+                        'Origin': 'http://192.168.191.56:5173'  
+                    },  
+                }  
+            );  
 
             if (!response.ok) {  
                 const errorData = await response.json().catch(() => null);  
@@ -46,7 +51,7 @@
             }  
 
             const data = await response.json();  
-            console.log("Received data:", data); // Debug log  
+            console.log("Received data:", data);  
 
             if (data.error) {  
                 error = data.error;  
@@ -62,9 +67,15 @@
         }  
     }  
 
-    // Function to toggle timeframe  
     function toggleTimeframe() {  
         timeframe = timeframe === '1d' ? '1w' : '1d';  
+        if (ticker) {  
+            fetchStockData();  
+        }  
+    }  
+
+    // Handle date selection  
+    $: if (dateString) {  
         if (ticker) {  
             fetchStockData();  
         }  
@@ -76,17 +87,26 @@
         <div class="p-6">  
             <h1 class="text-3xl font-bold mb-6">Stock Analysis</h1>  
 
-            <div class="flex gap-4 mb-6">  
+            <div class="flex flex-wrap gap-4 mb-6">  
                 <Input  
                     type="text"  
                     placeholder="Enter stock ticker..."  
                     bind:value={ticker}  
                     class="max-w-xs"  
                 />  
+
+                <!-- Simple Date Input -->  
+                <Input  
+                    type="date"  
+                    bind:value={dateString}  
+                    max={new Date().toISOString().split('T')[0]}  
+                    class="max-w-xs"  
+                />  
+
                 <Button on:click={fetchStockData} disabled={loading}>  
                     {loading ? 'Loading...' : 'Fetch Data'}  
                 </Button>  
-                <!-- Add timeframe toggle button -->  
+
                 <Button   
                     on:click={toggleTimeframe}   
                     disabled={loading}  
@@ -113,6 +133,7 @@
                 <div class="mb-6">  
                     <h2 class="text-xl font-bold mb-2">  
                         Stock Chart ({timeframe === '1d' ? 'Daily' : 'Weekly'})  
+                        from {new Date(dateString).toLocaleDateString()}  
                     </h2>  
                     <img  
                         src="data:image/png;base64,{chartImage}"  
