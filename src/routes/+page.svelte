@@ -9,6 +9,7 @@
     let error = "";  
     let chartImage: string | null = null;  
     let financials: any[] | null = null;  
+    let timeframe: '1d' | '1w' = '1d'; // Add timeframe state  
 
     const API_URL = "http://192.168.191.206:8000";  
 
@@ -30,7 +31,8 @@
                 throw new Error('API server is not responding');  
             }  
 
-            const response = await fetch(`${API_URL}/api/stock/${ticker}`, {  
+            // Add timeframe parameter to the URL  
+            const response = await fetch(`${API_URL}/api/stock/${ticker}?timeframe=${timeframe}`, {  
                 method: 'GET',  
                 headers: {  
                     'Accept': 'application/json',  
@@ -59,6 +61,14 @@
             loading = false;  
         }  
     }  
+
+    // Function to toggle timeframe  
+    function toggleTimeframe() {  
+        timeframe = timeframe === '1d' ? '1w' : '1d';  
+        if (ticker) {  
+            fetchStockData();  
+        }  
+    }  
 </script>  
 
 <div class="container mx-auto p-4">  
@@ -67,14 +77,22 @@
             <h1 class="text-3xl font-bold mb-6">Stock Analysis</h1>  
 
             <div class="flex gap-4 mb-6">  
-                <Input   
-                    type="text"   
-                    placeholder="Enter stock ticker..."   
+                <Input  
+                    type="text"  
+                    placeholder="Enter stock ticker..."  
                     bind:value={ticker}  
                     class="max-w-xs"  
                 />  
                 <Button on:click={fetchStockData} disabled={loading}>  
                     {loading ? 'Loading...' : 'Fetch Data'}  
+                </Button>  
+                <!-- Add timeframe toggle button -->  
+                <Button   
+                    on:click={toggleTimeframe}   
+                    disabled={loading}  
+                    variant={timeframe === '1d' ? "default" : "outline"}  
+                >  
+                    {timeframe === '1d' ? 'Daily' : 'Weekly'} View  
                 </Button>  
             </div>  
 
@@ -93,10 +111,12 @@
 
             {#if chartImage}  
                 <div class="mb-6">  
-                    <h2 class="text-xl font-bold mb-2">Stock Chart</h2>  
-                    <img   
-                        src="data:image/png;base64,{chartImage}"   
-                        alt="Stock Chart"   
+                    <h2 class="text-xl font-bold mb-2">  
+                        Stock Chart ({timeframe === '1d' ? 'Daily' : 'Weekly'})  
+                    </h2>  
+                    <img  
+                        src="data:image/png;base64,{chartImage}"  
+                        alt="Stock Chart"  
                         class="w-full"  
                     />  
                 </div>  
@@ -119,8 +139,8 @@
                                     <tr>  
                                         {#each Object.values(row) as value}  
                                             <td class="px-4 py-2">  
-                                                {typeof value === 'number'   
-                                                    ? value.toLocaleString()   
+                                                {typeof value === 'number'  
+                                                    ? value.toLocaleString()  
                                                     : value}  
                                             </td>  
                                         {/each}  
