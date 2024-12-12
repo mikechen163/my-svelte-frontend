@@ -250,6 +250,7 @@
                                 <th class="px-6 py-4 text-center border-b">Date</th>
                                 <th class="px-6 py-4 text-center border-b">Code</th>
                                 <th class="px-6 py-4 text-center border-b">Name</th>
+                                <th class="px-6 py-4 text-center border-b">Price</th>
                                 <th class="px-6 py-4 text-center border-b">Today ROE</th>
                                 <th class="px-6 py-4 text-center border-b">10D ROE</th>
                                 <th class="px-6 py-4 text-center border-b">30D ROE</th>
@@ -257,8 +258,9 @@
                                 <th class="px-6 py-4 text-center border-b">1Y ROE</th>
                                 <th class="px-6 py-4 text-center border-b">YTD ROE</th>
                                 <th class="px-6 py-4 text-center border-b">Market Cap</th>
+                                <th class="px-6 py-4 text-center border-b">Free Cap</th>
                                 <th class="px-6 py-4 text-center border-b">Amount</th>
-                                <th class="px-6 py-4 text-center border-b">Swap Ratio</th>
+                                <th class="px-6 py-4 text-center border-b">Turnover rate</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -268,6 +270,7 @@
                                     <td class="px-6 py-4 text-center border-b">{item.date}</td>
                                     <td class="px-6 py-4 text-center border-b">{item.code}</td>
                                     <td class="px-6 py-4 text-center border-b">{item.name}</td>
+                                     <td class="px-6 py-4 text-center border-b">{item.close}</td>
                                     <td class="px-6 py-4 text-center border-b {item.today_roe >= 0 ? 'text-green-600' : 'text-red-600'}">
                                         {item.today_roe.toFixed(2)}%
                                     </td>
@@ -287,8 +290,9 @@
                                         {item.ytd_roe.toFixed(2)}%
                                     </td>
                                     <td class="px-6 py-4 text-center border-b">{(item.total_cap).toFixed(2)}</td>
+                                    <td class="px-6 py-4 text-center border-b">{(item.free_cap).toFixed(2)}</td>                                
                                     <td class="px-6 py-4 text-center border-b">{(item.amount).toFixed(2)}</td>
-                                    <td class="px-6 py-4 text-center border-b">{item.swap_ratio.toFixed(2)}</td>
+                                    <td class="px-6 py-4 text-center border-b">{item.swap_ratio.toFixed(2)}%</td>
                                 </tr>
                             {/each}
                         </tbody>
