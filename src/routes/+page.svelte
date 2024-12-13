@@ -72,6 +72,25 @@
         showTable = false;
     }
 
+    type Ticker = string;
+
+// 定义转换函数
+function modifyTicker(ticker: Ticker): Ticker {
+    let modifiedTicker: Ticker = ticker;
+
+    if (ticker.length === 7 && ticker.startsWith('hk')) {
+        modifiedTicker = ticker.slice(3) + '.HK'; // 截取后4位并添加 .HK
+    } else if (ticker.length === 6 && /^\d+$/.test(ticker)) { // 6位数字
+        if (ticker.startsWith('6')) {
+            modifiedTicker = ticker + '.SS'; // 上海证券
+        } else {
+            modifiedTicker = ticker + '.SZ'; // 深圳证券
+        }
+    }
+
+    return modifiedTicker;
+}
+
     async function handlePageChange(direction: 'next' | 'prev') {
         if (direction === 'next' && currentPage < $marketStore.pagination.total_pages) {
             currentPage++;
@@ -268,7 +287,11 @@
                                 <tr class="cursor-pointer hover:bg-gray-100 {i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}"
                                     on:click={() => handleTickerClick(item.code, item.name)}>
                                     <td class="px-6 py-4 text-center border-b">{item.date}</td>
-                                    <td class="px-6 py-4 text-center border-b">{item.code}</td>
+                                     <td class="px-6 py-4 text-center border-b">
+                    <a href="https://finance.yahoo.com/quote/{modifyTicker(item.code)}" target="_blank" class="text-blue-500 hover:underline">
+                        {item.code}
+                    </a>
+                </td>
                                     <td class="px-6 py-4 text-center border-b">{item.name}</td>
                                      <td class="px-6 py-4 text-center border-b">{item.close}</td>
                                     <td class="px-6 py-4 text-center border-b {item.today_roe >= 0 ? 'text-green-600' : 'text-red-600'}">
