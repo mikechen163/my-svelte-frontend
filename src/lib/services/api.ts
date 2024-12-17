@@ -1,5 +1,5 @@
 // src/lib/services/api.ts
-const API_BASE_URL = 'http://192.168.191.56:4000/api/v1'; // 替换为你的 Rails API 地址
+//const API_BASE_URL = 'http://192.168.191.56:4000/api/v1'; // 替换为你的 Rails API 地址
 
 export class ApiError extends Error {
   constructor(public message: string, public status?: number, public errors?: Record<string, string[]>) {
@@ -23,7 +23,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
 export const api = {
   async login(credentials: LoginCredentials): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/login`, {
+    const response = await fetch(`/api/v1/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export const api = {
   },
 
   async getCurrentUser(token: string): Promise<User> {
-    const response = await fetch(`${API_BASE_URL}/me`, {
+    const response = await fetch(`/api/v1/me`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ export const api = {
   },
 
   async logout(token: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/logout`, {
+    const response = await fetch(`/api/v1/logout`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
