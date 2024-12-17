@@ -196,6 +196,35 @@ function modifyTicker(ticker: Ticker): Ticker {
                         <Input id="min-cap" type="number" bind:value={filterParams.min_market_cap} />
                     </div>
 
+                      <!-- Turnover Rate -->
+                        <div class="form-group">
+                            <label class="block text-sm font-medium mb-2" for="min-turnover">
+                                Min Turnover Rate (%)
+                            </label>
+                            <Input 
+                                id="min-turnover" 
+                                type="number" 
+                               
+                                bind:value={filterParams.min_turnover_rate} 
+                                min="0" 
+                                max="100" 
+                            />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="block text-sm font-medium mb-2" for="max-turnover">
+                                Max Turnover Rate (%)
+                            </label>
+                            <Input 
+                                id="max-turnover" 
+                                type="number" 
+                              
+                                bind:value={filterParams.max_turnover_rate} 
+                                min="0" 
+                                max="100" 
+                            />
+                        </div>
+
                     <div class="space-y-2">
                         <label for="sort">Sort By</label>
                         <select
