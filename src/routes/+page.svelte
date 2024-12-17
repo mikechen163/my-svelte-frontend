@@ -294,24 +294,48 @@ function modifyTicker(ticker: Ticker): Ticker {
                 </td>
                                     <td class="px-6 py-4 text-center border-b">{item.name}</td>
                                      <td class="px-6 py-4 text-center border-b">{item.close}</td>
-                                    <td class="px-6 py-4 text-center border-b {item.today_roe >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                        {item.today_roe.toFixed(2)}%
-                                    </td>
-                                    <td class="px-6 py-4 text-center border-b {item.d10_roe >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                        {item.d10_roe.toFixed(2)}%
-                                    </td>
-                                    <td class="px-6 py-4 text-center border-b {item.d30_roe >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                        {item.d30_roe.toFixed(2)}%
-                                    </td>
-                                    <td class="px-6 py-4 text-center border-b {item.d90_roe >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                        {item.d90_roe.toFixed(2)}%
-                                    </td>
-                                    <td class="px-6 py-4 text-center border-b {item.d1year_roe >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                        {item.d1year_roe.toFixed(2)}%
-                                    </td>
-                                    <td class="px-6 py-4 text-center border-b {item.ytd_roe >= 0 ? 'text-green-600' : 'text-red-600'}">
-                                        {item.ytd_roe.toFixed(2)}%
-                                    </td>
+                    <td class="px-6 py-4 text-center border-b {item.today_roe != null && item.today_roe >= 0 ? 'text-green-600' : (item.today_roe != null ? 'text-red-600' : '')}">
+               {#if item.today_roe != null}
+                {item.today_roe.toFixed(2)}%
+               {:else}
+                 -
+               {/if}
+            </td>
+            <td class="px-6 py-4 text-center border-b {item.d10_roe != null && item.d10_roe >= 0 ? 'text-green-600' : (item.d10_roe != null ? 'text-red-600' : '')}">
+                {#if item.d10_roe != null}
+                    {item.d10_roe.toFixed(2)}%
+                {:else}
+                    -
+                {/if}
+            </td>
+             <td class="px-6 py-4 text-center border-b {item.d30_roe != null && item.d30_roe >= 0 ? 'text-green-600' : (item.d30_roe != null ? 'text-red-600' : '')}">
+                {#if item.d30_roe != null}
+                    {item.d30_roe.toFixed(2)}%
+                {:else}
+                   -
+                {/if}
+            </td>
+            <td class="px-6 py-4 text-center border-b {item.d90_roe != null && item.d90_roe >= 0 ? 'text-green-600' : (item.d90_roe != null ? 'text-red-600' : '')}">
+                {#if item.d90_roe != null}
+                  {item.d90_roe.toFixed(2)}%
+                 {:else}
+                    -
+                {/if}
+            </td>
+            <td class="px-6 py-4 text-center border-b {item.d1year_roe != null && item.d1year_roe >= 0 ? 'text-green-600' : (item.d1year_roe != null ? 'text-red-600' : '')}">
+                 {#if item.d1year_roe != null}
+                   {item.d1year_roe.toFixed(2)}%
+                  {:else}
+                    -
+                 {/if}
+            </td>
+            <td class="px-6 py-4 text-center border-b {item.ytd_roe != null && item.ytd_roe >= 0 ? 'text-green-600' : (item.ytd_roe != null ? 'text-red-600' : '')}">
+                {#if item.ytd_roe != null}
+                    {item.ytd_roe.toFixed(2)}%
+                 {:else}
+                   -
+                 {/if}
+            </td>
                                     <td class="px-6 py-4 text-center border-b">{(item.total_cap).toFixed(2)}</td>
                                     <td class="px-6 py-4 text-center border-b">{(item.free_cap).toFixed(2)}</td>                                
                                     <td class="px-6 py-4 text-center border-b">{(item.amount).toFixed(2)}</td>
