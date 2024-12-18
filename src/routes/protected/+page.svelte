@@ -23,10 +23,13 @@
         return: -100,
         max_return: 1000,
         min_market_cap: 10,
-        market: "US",
+        min_turnover_rate: 0,
+        max_turnover_rate: 100,
+        market: "SH,SZ",
         date: new Date().toISOString().split('T')[0],
         sort: "Total Market Cap",
-        sort_direction: 'Desc' as 'Asc' | 'Desc'
+        sort_direction: 'Desc' as 'Asc' | 'Desc',
+        force_refresh: "0"
     };
 
     // Chart Parameters
@@ -206,8 +209,7 @@ function modifyTicker(ticker: Ticker): Ticker {
                                 type="number" 
                                
                                 bind:value={filterParams.min_turnover_rate} 
-                                min="0" 
-                                max="100" 
+                                
                             />
                         </div>
 
@@ -220,8 +222,7 @@ function modifyTicker(ticker: Ticker): Ticker {
                                 type="number" 
                               
                                 bind:value={filterParams.max_turnover_rate} 
-                                min="0" 
-                                max="100" 
+                               
                             />
                         </div>
 
@@ -247,6 +248,18 @@ function modifyTicker(ticker: Ticker): Ticker {
                         >
                             <option value="Desc">Descending</option>
                             <option value="Asc">Ascending</option>
+                        </select>
+                    </div>
+
+                      <div class="space-y-2">
+                        <label for="force_refresh">Force Refresh</label>
+                        <select
+                            id="force_refresh"
+                            class="w-full px-3 py-2 border rounded-md"
+                            bind:value={filterParams.force_refresh}
+                        >
+                            <option value="0">0</option>
+                            <option value="1">1</option>
                         </select>
                     </div>
 
