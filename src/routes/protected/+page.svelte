@@ -3,9 +3,19 @@
     import { Button } from "$lib/components/ui/button";
     import { Card } from "$lib/components/ui/card";
     import { Input } from "$lib/components/ui/input";
-    import { marketStore, loading, error, fetchMarketData } from '$lib/stores/marketStore';
+    //import { marketStore, loading, error, fetchMarketData } from '$lib/stores/marketStore';
     //import { stocks, fetchStocks } from '$lib/stores/stockStore';
 	//  import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "$lib/components/ui/dialog";
+
+    // Add these imports at the top with other imports
+    import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "$lib/components/ui/dialog";
+    import { marketStore, loading, error, fetchMarketData, stockDataStore, stockDataLoading, stockDataError, fetchStockData } from '$lib/stores/marketStore';
+    import StockChart from '$lib/components/StockChart.svelte';
+
+    // Add state variables for chart
+    let chartInitialized = false;
+    let showChartModal = false;
+
 
     // State variables for UI control
     let showInputInterface = true;
@@ -13,7 +23,7 @@
     let showTable = false;
 
     // Modal control
-    let showChartModal = false;
+  
     let chartImageToShow: string | null = null;
     let selectedTickerName:string | null = null;
 
@@ -95,6 +105,40 @@ function modifyTicker(ticker: Ticker): Ticker {
     return modifiedTicker;
 }
 
+
+
+async function handleTickerClick(ticker: string, name: string) {
+        let modifiedTicker = modifyTicker(ticker);
+        selectedTicker = modifiedTicker;
+        selectedTickerName = name;
+        showChartModal = true;
+
+        let endDate = new Date();
+        let startDate = new Date();
+        startDate.setFullYear(startDate.getFullYear() - 2);
+        
+        await fetchStockData(
+            modifiedTicker, 
+            startDate.toISOString().split('T')[0], 
+            endDate.toISOString().split('T')[0],
+            timeframe  // Pass the timeframe parameter
+        );
+    }
+
+    // Add watch for timeframe changes
+    $: if (showChartModal && selectedTicker) {
+        let endDate = new Date();
+        let startDate = new Date();
+        startDate.setFullYear(startDate.getFullYear() - 2);
+        
+        fetchStockData(
+            selectedTicker,
+            startDate.toISOString().split('T')[0],
+            endDate.toISOString().split('T')[0],
+            timeframe
+        );
+    }
+
     async function handlePageChange(direction: 'next' | 'prev') {
         if (direction === 'next' && currentPage < $marketStore.pagination.total_pages) {
             currentPage++;
@@ -105,30 +149,7 @@ function modifyTicker(ticker: Ticker): Ticker {
     }
 
 
-    async function handleTickerClick(ticker: string, name: string) {
-       let modifiedTicker = ticker;
-
-       if (ticker.length === 7 && ticker.startsWith('hk')) {
-          modifiedTicker = ticker.slice(3) + '.HK'; // Select last 4 letters and append .HK
-       } else if (ticker.length === 6 && /^\d+$/.test(ticker)) {  // 6 digits
-         if (ticker.startsWith('6')) {
-             modifiedTicker = ticker + '.SS'
-          } else {
-             modifiedTicker = ticker + '.SZ'
-           }
-        }
-
-       selectedTicker = modifiedTicker; // Use the modified ticker
-       selectedTickerName = name;
-       //await fetchStocks(modifiedTicker, timeframe, chartDateString, new Date().toISOString().split('T')[0]);
-
-        // After fetchStocks, show modal and save the chart image to state
-        //if ($stocks && $stocks.chart) {
-        //    chartImageToShow = $stocks.chart;
-        //    showChartModal = true;
-        //}
-
-    }
+  
 
      function closeModal() {
         showChartModal = false;
@@ -143,10 +164,77 @@ function modifyTicker(ticker: Ticker): Ticker {
             handleTickerClick(selectedTicker, selectedTickerName || '');
         }
     }
+
+  
 </script>
 
 {#if $auth}
 <div class="container mx-auto p-4">
+
+
+ <!-- 在模态框内容部分 -->
+
+   {#if showChartModal}
+    <div class="modal-container">
+        <!-- 遮罩层 -->
+        <div class="modal-overlay" on:click={() => showChartModal = false}></div>
+        
+        <!-- 固定的图表容器 -->
+        <div class="modal-content">
+            <!-- 标题栏 -->
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    {selectedTickerName} ({selectedTicker})
+                </h3>
+                <button 
+                    class="close-button"
+                    on:click={() => showChartModal = false}
+                >
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 图表内容 -->
+            <div class="modal-body">
+                {#if $stockDataLoading}
+                    <div class="loading-state">
+                        <span>Loading chart data...</span>
+                    </div>
+                {:else if $stockDataError}
+                    <div class="error-state">
+                        Error loading chart data: {$stockDataError}
+                    </div>
+                {:else if $stockDataStore && $stockDataStore.length > 0}
+                    <div class="chart-container">
+                        <StockChart 
+                            stockData={$stockDataStore} 
+                            timeframe={timeframe}
+                        />
+                    </div>
+                {/if}
+            </div>
+
+            <!-- 底部按钮 -->
+            <div class="modal-footer">
+                <button 
+                    class="timeframe-button"
+                    on:click={() => timeframe = timeframe === '1d' ? '1w' : '1d'}
+                >
+                    Toggle {timeframe === '1d' ? 'Weekly' : 'Daily'} View
+                </button>
+                <button 
+                    class="close-button"
+                    on:click={() => showChartModal = false}
+                >
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+{/if}
+
     {#if showInputInterface}
         <Card class="w-full max-w-6xl mx-auto mb-6">
             <div class="p-6">
@@ -398,43 +486,204 @@ function modifyTicker(ticker: Ticker): Ticker {
             </div>
         </Card>
     {/if}
+
+
+
+  
   
     
 </div>
 {/if}
 
 <style>
-    :global(body) {
-        background-color: #f0f0f0;
+    /* 全局样式 */
+:global(body) {
+    background-color: #f0f0f0;
+    overflow-y: auto !important;
+    padding-right: 0 !important; /* 防止滚动条导致页面抖动 */
+    position: relative;
+}
+
+/* 表格样式 */
+.market-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: sans-serif;
+    font-size: 14px;
+    color: #333;
+}
+
+.market-table th, 
+.market-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.market-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.market-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.market-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #f2f2f2;
+}
+
+/* 模态框样式 */
+:global(.dialog-overlay) {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 50;
+}
+
+:global(.dialog-content) {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    max-height: 90vh;
+    overflow-y: auto;
+    width: 90%;
+    max-width: 1024px;
+    z-index: 51;
+    animation: dialogSlideIn 0.2s ease-out;
+}
+
+/* 动画效果 */
+@keyframes dialogSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+
+/* 模态框容器 */
+    .modal-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
     }
 
-    .market-table {
-        border-collapse: collapse;
-        width: 100%;
-        font-family: sans-serif;
-        font-size: 14px;
-        color: #333;
+    /* 遮罩层 */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1001;
     }
 
-    .market-table th, .market-table td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
+    /* 模态框内容 */
+    .modal-content {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 1200px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        z-index: 1002;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
-    .market-table th {
-        background-color: #f2f2f2;
+    /* 标题栏 */
+    .modal-header {
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8f9fa;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
         font-weight: bold;
+        color: #1a1a1a;
     }
 
-    .market-table tr:nth-child(even) {
-        background-color: #f9f9f9;
+    /* 内容区域 */
+    .modal-body {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+        min-height: 400px;
+        max-height: calc(90vh - 130px); /* 减去头部和底部的高度 */
     }
 
-    .market-table thead {
-       position: sticky;
-       top: 0;
-       z-index: 10;
-       background-color: #f2f2f2;
+    .chart-container {
+        height: 100%;
+        min-height: 400px;
+    }
+
+    /* 底部按钮区 */
+    .modal-footer {
+        padding: 1rem;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        background: #f8f9fa;
+        border-radius: 0 0 8px 8px;
+    }
+
+    /* 按钮样式 */
+    .close-button,
+    .timeframe-button {
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        border: 1px solid #e5e7eb;
+        background: white;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .close-button:hover,
+    .timeframe-button:hover {
+        background: #f3f4f6;
+    }
+
+    /* 加载状态 */
+    .loading-state {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 400px;
+    }
+
+    /* 错误状态 */
+    .error-state {
+        color: #dc2626;
+        padding: 1rem;
+        text-align: center;
     }
 </style>
