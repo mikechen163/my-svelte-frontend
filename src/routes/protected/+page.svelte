@@ -180,58 +180,57 @@ async function handleTickerClick(ticker: string, name: string) {
         <div class="modal-overlay" on:click={() => showChartModal = false}></div>
         
         <!-- 固定的图表容器 -->
-        <div class="modal-content">
-            <!-- 标题栏 -->
-            <div class="modal-header">
-                <h3 class="modal-title">
-                    {selectedTickerName} ({selectedTicker})
-                </h3>
-                <button 
-                    class="close-button"
-                    on:click={() => showChartModal = false}
-                >
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
+       <div class="modal-content">
+    <div class="modal-header">
+        <button 
+            class="close-button"
+            on:click={() => showChartModal = false}
+        >
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+        <h3 class="modal-title">
+            {selectedTickerName} ({selectedTicker})
+        </h3>
+        <div style="width: 24px;"></div> <!-- 平衡左侧关闭按钮的空间 -->
+    </div>
 
-            <!-- 图表内容 -->
-            <div class="modal-body">
-                {#if $stockDataLoading}
-                    <div class="loading-state">
-                        <span>Loading chart data...</span>
-                    </div>
-                {:else if $stockDataError}
-                    <div class="error-state">
-                        Error loading chart data: {$stockDataError}
-                    </div>
-                {:else if $stockDataStore && $stockDataStore.length > 0}
-                    <div class="chart-container">
-                        <StockChart 
-                            stockData={$stockDataStore} 
-                            timeframe={timeframe}
-                        />
-                    </div>
-                {/if}
+    <div class="modal-body">
+        {#if $stockDataLoading}
+            <div class="loading-state">
+                <span>Loading chart data...</span>
             </div>
+        {:else if $stockDataError}
+            <div class="error-state">
+                Error loading chart data: {$stockDataError}
+            </div>
+        {:else if $stockDataStore && $stockDataStore.length > 0}
+            <div class="chart-container">
+                <StockChart 
+                    stockData={$stockDataStore} 
+                    timeframe={timeframe}
+                />
+            </div>
+        {/if}
+    </div>
 
-            <!-- 底部按钮 -->
-            <div class="modal-footer">
-                <button 
-                    class="timeframe-button"
-                    on:click={() => timeframe = timeframe === '1d' ? '1w' : '1d'}
-                >
-                    Toggle {timeframe === '1d' ? 'Weekly' : 'Daily'} View
-                </button>
-                <button 
-                    class="close-button"
-                    on:click={() => showChartModal = false}
-                >
-                    Close
-                </button>
-            </div>
-        </div>
+    <div class="modal-footer">
+        <button 
+            class="timeframe-button"
+            on:click={() => timeframe = timeframe === '1d' ? '1w' : '1d'}
+        >
+            {timeframe === '1d' ? 'Weekly View' : 'Daily View'}
+        </button>
+        <button 
+            class="close-button"
+            on:click={() => showChartModal = false}
+        >
+            Close
+        </button>
+    </div>
+</div>
+
     </div>
 {/if}
 
@@ -686,4 +685,204 @@ async function handleTickerClick(ticker: string, name: string) {
         padding: 1rem;
         text-align: center;
     }
+
+    
+    /* 模态框内容基础样式 */
+.modal-content {
+    position: fixed;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    z-index: 1002;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    
+    /* PC端默认样式 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 95%;
+    max-width: 1400px;
+    height: auto;
+    min-height: min-content;
+}
+
+/* 移动端样式 */
+@media (max-width: 768px) {
+    .modal-content {
+        top: 0;
+        left: 0;
+        right: 0;
+        transform: none;
+        width: 38%;
+        height: 80vh;
+        border-radius: 0;
+    }
+
+    .modal-header {
+        padding: 0.25rem 0.5rem;
+        min-height: 40px;
+    }
+
+    .modal-title {
+        font-size: 1rem; /* 减小标题字体 */
+    }
+
+    .modal-body {
+        padding: 0.25rem;
+        max-height: calc(80vh - 90px); /* 减少内容区域高度，90px是头部和底部的总高度 */
+    }
+
+    .chart-container {
+        min-height: 250px; /* 减少图表最小高度 */
+        height: calc(80vh - 100px); /* 动态调整图表高度 */
+    }
+
+    .modal-footer {
+        padding: 0.25rem 0.5rem;
+        min-height: 40px;
+    }
+
+    /* 移动端按钮样式优化 */
+    .close-button,
+    .timeframe-button {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 关闭按钮图标大小调整 */
+    .close-button svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+/* 通用样式优化 */
+.modal-header {
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+}
+
+.modal-body {
+    flex: 1;
+    padding: 0.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+.modal-footer {
+    padding: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+}
+
+/* 标题居中样式 */
+.modal-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60%;
+}
+
+/* 修改 modal-content 的样式 */
+.modal-content {
+    position: fixed;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    z-index: 1002;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    
+    /* PC端默认样式 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 95%;
+    max-width: 1400px;
+    height: 85vh; /* 增加PC端高度 */
+    min-height: 600px;
+}
+
+/* 移动端样式 */
+@media (max-width: 768px) {
+    .modal-content {
+        position: absolute; /* 改为absolute以跟随滚动 */
+        top: 20px; /* 距离顶部的距离 */
+        left: 20%;
+        transform: translateX(-50%);
+        width: 38%;
+        height: 80vh;
+        margin-bottom: 20px; /* 底部留出间距 */
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow-y: auto; /* 允许遮罩层滚动 */
+        padding: 20px 0; /* 上下留出空间 */
+    }
+
+    .modal-container {
+        min-height: calc(100vh + 40px); /* 确保有足够的滚动空间 */
+        padding: 20px 0;
+    }
+}
+
+/* 优化图表容器 */
+.chart-container {
+    flex: 1;
+    min-height: 400px;
+    height: calc(100% - 40px); /* 减去头部和底部的高度 */
+    overflow: hidden;
+}
+
+/* PC端的图表高度 */
+@media (min-width: 769px) {
+    .chart-container {
+        min-height: 500px;
+        height: calc(85vh - 120px); /* 适应更大的模态框高度 */
+    }
+}
+
+/* 确保模态框内容不会溢出 */
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 优化头部和底部 */
+.modal-header,
+.modal-footer {
+    flex-shrink: 0; /* 防止头部和底部被压缩 */
+}
 </style>

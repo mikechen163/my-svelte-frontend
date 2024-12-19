@@ -18,6 +18,23 @@
     let chartDiv: HTMLElement;
     let chart: echarts.ECharts;
 
+    // 计算移动平均线
+    function calculateMA(dayCount: number, data: StockData[]) {
+        const result = [];
+        for (let i = 0; i < data.length; i++) {
+            if (i < dayCount - 1) {
+                result.push('-');
+                continue;
+            }
+            let sum = 0;
+            for (let j = 0; j < dayCount; j++) {
+                sum += data[i - j].close;
+            }
+            result.push(+(sum / dayCount).toFixed(2));
+        }
+        return result;
+    }
+
     function initChart() {
         if (chartDiv && stockData) {
             chart = echarts.init(chartDiv);
@@ -36,7 +53,7 @@
                 }
             },
             legend: {
-                data: ['K线', '成交量']
+                data: ['K线', 'MA5', 'MA10', 'MA20', 'MA30', '成交量']
             },
             grid: [{
                 left: '10%',
@@ -118,6 +135,46 @@
                     }
                 },
                 {
+                    name: 'MA5',
+                    type: 'line',
+                    data: calculateMA(5, stockData),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {
+                        width: 1
+                    }
+                },
+                {
+                    name: 'MA10',
+                    type: 'line',
+                    data: calculateMA(10, stockData),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {
+                        width: 1
+                    }
+                },
+                {
+                    name: 'MA20',
+                    type: 'line',
+                    data: calculateMA(20, stockData),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {
+                        width: 1
+                    }
+                },
+                {
+                    name: 'MA30',
+                    type: 'line',
+                    data: calculateMA(30, stockData),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {
+                        width: 1
+                    }
+                },
+                {
                     name: '成交量',
                     type: 'bar',
                     xAxisIndex: 1,
@@ -153,6 +210,12 @@
 
 <style>
     div {
-        min-height: 400px;
+        min-height: 700px;
+    }
+
+    @media (max-width: 768px) {
+     div {
+        min-height: 500px;
+        }
     }
 </style>
