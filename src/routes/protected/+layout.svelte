@@ -2,7 +2,7 @@
 <script lang="ts">
     import { auth } from '$lib/stores/authStore';
     import { goto } from '$app/navigation';
-    import { Button } from "$lib/components/ui/button";
+    import Sidebar from '$lib/components/Sidebar.svelte';
 
     async function handleLogout() {
         if (confirm('确定要退出登录吗？')) {
@@ -15,8 +15,21 @@
     $: user = $auth;
 </script>
 
-
-
-<div class="container mx-auto px-4 py-6">
-    <slot />
+<div class="flex h-screen">
+    <!-- Sidebar -->
+    <Sidebar />
+    
+    <!-- Main Content -->
+    <div class="flex-1 ml-64 overflow-auto">
+        <div class="p-6">
+            <slot />
+        </div>
+    </div>
 </div>
+
+<style>
+    :global(body) {
+        margin: 0;
+        padding: 0;
+    }
+</style>
