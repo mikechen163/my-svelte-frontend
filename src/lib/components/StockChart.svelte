@@ -35,6 +35,49 @@
         return result;
     }
 
+    // 计算MACD
+    function calculateMACD(data: StockData[]) {
+        const closePrice = data.map(item => item.close);
+        const shortPeriod = 12;
+        const longPeriod = 26;
+        const signalPeriod = 9;
+        
+        // 计算EMA
+        function calculateEMA(period: number, prices: number[]) {
+            const k = 2 / (period + 1);
+            const emaData = [];
+            let ema = prices[0];
+            
+            for (let i = 0; i < prices.length; i++) {
+                if (i === 0) {
+                    emaData.push(ema);
+                } else {
+                    ema = (prices[i] * k) + (ema * (1 - k));
+                    emaData.push(ema);
+                }
+            }
+            return emaData;
+        }
+
+        const shortEMA = calculateEMA(shortPeriod, closePrice);
+        const longEMA = calculateEMA(longPeriod, closePrice);
+
+        // 计算DIF
+        const dif = shortEMA.map((value, index) => value - longEMA[index]);
+
+        // 计算DEA (MACD Signal Line)
+        const dea = calculateEMA(signalPeriod, dif);
+
+        // 计算MACD柱状图
+        const macd = dif.map((value, index) => 2 * (value - dea[index]));
+
+        return {
+            dif: dif.map(item => +item.toFixed(3)),
+            dea: dea.map(item => +item.toFixed(3)),
+            macd: macd.map(item => +item.toFixed(3))
+        };
+    }
+
     function initChart() {
         if (chartDiv && stockData) {
             chart = echarts.init(chartDiv);
@@ -45,6 +88,8 @@
     function updateChart() {
         if (!chart || !stockData) return;
 
+        const macdData = calculateMACD(stockData);
+
         const option = {
             tooltip: {
                 trigger: 'axis',
@@ -53,12 +98,17 @@
                 }
             },
             legend: {
-                data: ['K线', 'MA5', 'MA10', 'MA20', 'MA30', '成交量']
+                data: ['K线', 'MA5', 'MA10', 'MA20', 'MA30', '成交量', 'MACD', 'DIF', 'DEA']
             },
             grid: [{
                 left: '10%',
                 right: '10%',
-                height: '60%'
+                height: '45%'
+            }, {
+                left: '10%',
+                right: '10%',
+                top: '55%',
+                height: '15%'
             }, {
                 left: '10%',
                 right: '10%',
@@ -86,6 +136,18 @@
                 axisLabel: { show: false },
                 min: 'dataMin',
                 max: 'dataMax'
+            }, {
+                type: 'category',
+                gridIndex: 2,
+                data: stockData.map(item => item.date),
+                scale: true,
+                boundaryGap: false,
+                axisLine: { onZero: false },
+                axisTick: { show: false },
+                splitLine: { show: false },
+                axisLabel: { show: false },
+                min: 'dataMin',
+                max: 'dataMax'
             }],
             yAxis: [{
                 scale: true,
@@ -100,17 +162,25 @@
                 axisLine: { show: false },
                 axisTick: { show: false },
                 splitLine: { show: false }
+            }, {
+                scale: true,
+                gridIndex: 2,
+                splitNumber: 2,
+                axisLabel: { show: true },
+                axisLine: { show: true },
+                axisTick: { show: true },
+                splitLine: { show: false }
             }],
             dataZoom: [
                 {
                     type: 'inside',
-                    xAxisIndex: [0, 1],
+                    xAxisIndex: [0, 1, 2],
                     start: 0,
                     end: 100
                 },
                 {
                     show: true,
-                    xAxisIndex: [0, 1],
+                    xAxisIndex: [0, 1, 2],
                     type: 'slider',
                     bottom: '0%',
                     start: 0,
@@ -180,6 +250,42 @@
                     xAxisIndex: 1,
                     yAxisIndex: 1,
                     data: stockData.map(item => item.volume)
+                },
+                {
+                    name: 'MACD',
+                    type: 'bar',
+                    xAxisIndex: 2,
+                    yAxisIndex: 2,
+                    data: macdData.macd,
+                    itemStyle: {
+                        color: function(params: any) {
+                            return params.data >= 0 ? '#ef5350' : '#26a69a';
+                        }
+                    }
+                },
+                {
+                    name: 'DIF',
+                    type: 'line',
+                    xAxisIndex: 2,
+                    yAxisIndex: 2,
+                    data: macdData.dif,
+                    showSymbol: false,  // 添加这行，不显示线上的圆点
+                    smooth: true,
+                    lineStyle: {
+                        width: 1
+                    }
+                },
+                {
+                    name: 'DEA',
+                    type: 'line',
+                    xAxisIndex: 2,
+                    yAxisIndex: 2,
+                    data: macdData.dea,
+                    showSymbol: false,  // 添加这行，不显示线上的圆点
+                    smooth: true,
+                    lineStyle: {
+                        width: 1
+                    }
                 }
             ]
         };
@@ -210,12 +316,13 @@
 
 <style>
     div {
-        min-height: 700px;
+        min-height: 680px;
     }
 
     @media (max-width: 768px) {
      div {
-        min-height: 500px;
+        min-height: 450px;
         }
     }
 </style>
+

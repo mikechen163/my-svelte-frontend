@@ -714,7 +714,7 @@ async function handleTickerClick(ticker: string, name: string) {
         left: 0;
         right: 0;
         transform: none;
-        width: 38%;
+        width: 50%;
         height: 80vh;
         border-radius: 0;
     }
@@ -829,11 +829,11 @@ async function handleTickerClick(ticker: string, name: string) {
 /* 移动端样式 */
 @media (max-width: 768px) {
     .modal-content {
-        position: absolute; /* 改为absolute以跟随滚动 */
-        top: 20px; /* 距离顶部的距离 */
-        left: 20%;
+        position: fixed; /* 改为absolute以跟随滚动 */
+        top: 40%; /* 距离顶部的距离 */
+        left: 40%;
         transform: translateX(-50%);
-        width: 38%;
+        width: 60%;
         height: 80vh;
         margin-bottom: 20px; /* 底部留出间距 */
     }
