@@ -98,6 +98,7 @@
                 }
             },
             legend: {
+              
                 data: ['K线', 'MA5', 'MA10', 'MA20', 'MA30', '成交量', 'MACD', 'DIF', 'DEA']
             },
             grid: [{
